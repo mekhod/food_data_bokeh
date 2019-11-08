@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from bokeh.models import FactorRange
-from bokeh.models.widgets import TextInput
 from bokeh.layouts import column
 from bokeh.palettes import Spectral6, Spectral4
 from bokeh.io import curdoc
@@ -40,7 +39,6 @@ def create_x_and_counts(df=None, cities=None, list_of_determinants=['_FLSHOT6', 
 
 def update_plot(attrname, old, new):
     cities_0 = [city_selection.labels[i] for i in city_selection.active]
-    # cities_0 = text.value.split(',')
     cities_all = [i.strip() for i in list(df.index.unique())]
     cities = [i.strip() for i in cities_0 if i.strip() in cities_all]
 
@@ -85,8 +83,6 @@ city_selection = CheckboxGroup(labels=checkbox_cities_labels,
                                active=[])
 
 #########################
-
-#########################
 columns_to_select = [c for c in df.columns if c.startswith('_')]
 columns_to_select = ['city'] + columns_to_select
 df = df.loc[:, columns_to_select]
@@ -107,9 +103,7 @@ checkbox_determinants_labels = list(cols)
 determinants_selection = CheckboxGroup(labels=list(np.sort(checkbox_determinants_labels)),
                                        active=[10, 11])
 
-
 #########################
-
 x, counts = create_x_and_counts(df=df, cities=cities)
 
 source = ColumnDataSource(data=dict(x=x, counts=counts, colors=()))  # ,colors=(sum(zip(Spectral6, Spectral6), ())
@@ -123,11 +117,10 @@ city_selection.on_change('active', update_plot)
 determinants_selection.on_change('active', update_plot)
 
 checkbox_cities_column = column(city_selection)
-# from bokeh.models import Title
-# checkbox_cities_column.add_layout(Title(text="Title", text_font_size="16pt"), 'above')
 checkbox_determinants_column = column(determinants_selection)
 
 bokeh_doc = curdoc()
 bokeh_doc.add_root(row(checkbox_cities_column, p, checkbox_determinants_column, width=1500))
 
 # bokeh serve --show plot_bar_chart.py
+# python -m notebook
