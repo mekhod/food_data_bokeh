@@ -28,12 +28,9 @@ def create_x_and_counts(df=None, cities=None,
          for city in list(np.unique(list(df_selected.index)))
          for determinant in list(df_selected.columns)]
 
-    cnts = [df_selected.loc[(df_selected.index == city) *
-                            (df_selected[[determinant]] == cat).values.squeeze(), determinant].shape[0] /
-            df_selected.loc[df_selected.index == city, determinant].shape[0] * 100
+    cnts = [df_selected.loc[df_selected.index == city, determinant].values[0]
             for city in list(np.unique(list(df_selected.index)))
-            for determinant in list(df_selected.columns)
-            for cat in list(np.unique(list(df_selected.loc[:, determinant])))]
+            for determinant in list(df_selected.columns)]
     return x, cnts
 
 
@@ -69,13 +66,13 @@ def update_plot(attrname, old, new):
 
 cities = ['']
 
-df = pd.read_csv('data/Food/wrangled_data.csv')
+df = pd.read_csv('data/Food/df_transformed.csv')
 
-names = [str(n).split(',')[0].strip() for n in df.MMSANAME]
-
-df['city'] = names
-
-df = df.loc[df.city != 'nan', :].copy()
+# names = [str(n).split(',')[0].strip() for n in df.MMSANAME]
+#
+# df['city'] = names
+#
+# df = df.loc[df.city != 'nan', :].copy()
 
 #########################
 checkbox_cities_labels = list(df.city.unique())
@@ -83,9 +80,9 @@ city_selection = CheckboxGroup(labels=checkbox_cities_labels,
                                active=[])
 
 #########################
-columns_to_select = [c for c in df.columns if c.startswith('_')]
-columns_to_select = ['city'] + columns_to_select
-df = df.loc[:, columns_to_select]
+columns_to_select = [c for c in df.columns] # if c.startswith('_')]
+# columns_to_select = ['city'] + columns_to_select
+# df = df.loc[:, columns_to_select]
 
 cols = list(df.columns)
 cols.remove('city')
