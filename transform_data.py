@@ -1,14 +1,8 @@
 import pandas as pd
 import numpy as np
-from scipy import stats
-from sklearn.decomposition import PCA
-import seaborn as sns; sns.set()
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+import seaborn as sns;
 
-from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
+sns.set()
 
 df = pd.read_csv("data/Food/wrangled_data.csv")
 
@@ -43,7 +37,6 @@ df = df.astype(str)
 for col in df.columns:
     df[col] = df[col].str.strip()
 
-
 np.where(df.applymap(lambda x: x == ''))
 
 for col in df.columns:
@@ -72,7 +65,6 @@ def transform_chunk(chunk):
         if dict_col_unique_counts[col] < 30:
             print(col)
             for cat in list(np.unique(chunk[[col]])):
-
                 dict_temp_transformed_data[col + '_' + str(cat)] = sum((chunk[[col]].values == cat).squeeze()) / len(
                     chunk)
         else:
@@ -88,15 +80,14 @@ sth = df.groupby('city').apply(lambda chunk: transform_chunk(chunk))
 df_transformed = pd.DataFrame(list_data_transformed)
 
 set(df_transformed.columns) - set(['FTJUDA2__mean', 'FRUTDA2__mean', 'GRENDA1__mean', 'FRNCHDA__mean',
-       'POTADA1__mean', 'VEGEDA2__mean', '_FRUTSU1_mean', '_VEGESU1_mean',
-       '_FRTLT1A_1.0', '_FRTLT1A_2.0', '_FRTLT1A_9.0', '_VEGLT1A_1.0',
-       '_VEGLT1A_2.0', '_VEGLT1A_9.0', '_FRT16A_1.0', '_VEG23A_0.0',
-       '_VEG23A_1.0', '_FRT16A_0.0'])
+                                   'POTADA1__mean', 'VEGEDA2__mean', '_FRUTSU1_mean', '_VEGESU1_mean',
+                                   '_FRTLT1A_1.0', '_FRTLT1A_2.0', '_FRTLT1A_9.0', '_VEGLT1A_1.0',
+                                   '_VEGLT1A_2.0', '_VEGLT1A_9.0', '_FRT16A_1.0', '_VEG23A_0.0',
+                                   '_VEG23A_1.0', '_FRT16A_0.0'])
 
 ## Fill Na of df_transformed
-
 df_transformed = df_transformed.fillna(df_transformed.median())
-# df_transformed.head()
+
 df_transformed = df_transformed.set_index('city')
 
 ## Save data
