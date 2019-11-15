@@ -1,17 +1,23 @@
 import pandas as pd
+import googlemaps
+from datetime import datetime
+import pickle
 
 df_parks = pd.read_csv('data/Parks/park_dtl.dbf.csv')
 
-df_parks.shape
+with open('gcp_api_key.pkl', 'rb') as handle:
+    dict_api_key = pickle.load(handle)
 
-df_parks[1000:1100]
+api_key = dict_api_key['gcp_api_key']
 
-import requests
+gmaps = googlemaps.Client(key=api_key)
 
 park_name = 'Gorman Avenue Park'
 
-response = requests.get("""https://maps.googleapis.com/maps/api/geocode/json?address={}""".format(park_name))
+geocode_result = gmaps.geocode(park_name)
 
-resp_json_payload = response.json()
+len(geocode_result)
+geocode_result[0].keys()
 
-print(resp_json_payload['results'][0]['geometry']['location'])
+## find all parks
+parks_all = gmaps.places(query='park', radius=1000) #radius is in meters
