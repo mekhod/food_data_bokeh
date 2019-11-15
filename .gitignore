@@ -1,3 +1,5 @@
 ﻿/data
 /.ipynb_checkpoints
 /.idea
+/gcp_api_key.pkl
+/creat_gcp_api_key.py

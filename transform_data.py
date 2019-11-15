@@ -4,7 +4,7 @@ import seaborn as sns;
 
 sns.set()
 
-df = pd.read_csv("data/Food/wrangled_data.csv")
+df = pd.read_csv("data/Food/wrangled_food_data.csv")
 
 names = [str(n).split(',')[0].strip() for n in df.MMSANAME]
 
