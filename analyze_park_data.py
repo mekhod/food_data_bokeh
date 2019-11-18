@@ -20,4 +20,8 @@ len(geocode_result)
 geocode_result[0].keys()
 
 ## find all parks
-parks_all = gmaps.places(query='park', radius=1000) #radius is in meters
+parks_all = gmaps.places(query='', type='park', radius=10000) #radius is in meters
+
+for p in parks_all['results']:
+    if 'Park' not in p['name']:
+        print(p['name'])
