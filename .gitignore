@@ -3,3 +3,4 @@
 /.idea
 /gcp_api_key.pkl
 /creat_gcp_api_key.py
+!/data/Community_Context/create_mappers.py
