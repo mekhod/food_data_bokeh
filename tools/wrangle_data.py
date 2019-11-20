@@ -42,7 +42,7 @@ def parse_community_data(work=None):
     metropolitan_code = work[95:100]  # 00000 means it is not identified
     county_code = work[100:103]  # 000 means it is not identified
     age_range = work[160:162]  # anything other than 1, as 1 is child
-    voting_type = work[1000:1002]  # voter type cannot be -1 because it means the person is not in
+    voting_type = work[1000:1002].strip()  # voter type cannot be -1 because it means the person is not in
     # the universe(is not qualified for voting)
     registered_type = work[1002:1004].strip()
 
