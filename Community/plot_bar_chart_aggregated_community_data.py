@@ -16,21 +16,17 @@ def get_df_selected(df, cities):
     return df_selected
 
 
-def create_x_and_counts(df=None, cities=None,
-                        list_of_determinants=['FTJUDA2__mean', 'FRUTDA2__mean']):
+def create_x_and_counts(df=None, cities=None):
     df_selected = get_df_selected(df=df, cities=cities)
 
     ##################################################
-    df_selected = df_selected.loc[:, list_of_determinants].copy()
+    # df_selected = df_selected.loc[:, 'voters_ratio'].copy()
 
     ##################################################
-    x = [(str(determinant), str(city))
-         for city in list(np.unique(list(df_selected.index)))
-         for determinant in list(df_selected.columns)]
+    x = [str(city) for city in list(np.unique(list(df_selected.index)))]
 
-    cnts = [df_selected.loc[df_selected.index == city, determinant].values[0]
-            for city in list(np.unique(list(df_selected.index)))
-            for determinant in list(df_selected.columns)]
+    cnts = [df_selected.loc[df_selected.index == city, 'voters_ratio'].values[0]
+            for city in list(np.unique(list(df_selected.index)))]
     return x, cnts
 
 
@@ -38,10 +34,11 @@ def update_plot(attrname, old, new):
     cities_0 = [city_selection.labels[i] for i in city_selection.active]
     cities_all = [i.strip() for i in list(df.index.unique())]
     cities = [i.strip() for i in cities_0 if i.strip() in cities_all]
+    print(cities)
 
-    dtrmts = [determinants_selection.labels[i] for i in determinants_selection.active]
+    # dtrmts = [determinants_selection.labels[i] for i in determinants_selection.active]
 
-    x_new, counts_new = create_x_and_counts(df=df, cities=cities, list_of_determinants=dtrmts)
+    x_new, counts_new = create_x_and_counts(df=df, cities=cities)
 
     palette = Spectral4 + Spectral6
     palette += palette
@@ -64,60 +61,70 @@ def update_plot(attrname, old, new):
     p.xgrid.grid_line_color = None
 
 
-cities = ['']
-
-df = pd.read_csv('data/Food/df_transformed.csv')
-
-# names = [str(n).split(',')[0].strip() for n in df.MMSANAME]
-#
-# df['city'] = names
-#
-# df = df.loc[df.city != 'nan', :].copy()
 
 #########################
+df = pd.read_csv('data/Community_Context/data_voters_ratio.csv')
+df['city'] = df.metropolitan
+
+#########################
+cities = []
+cities.append(df.loc[df.voters_ratio == np.max(df.voters_ratio), 'city'].values[0])
+cities.append(df.loc[df.voters_ratio == np.median(df.voters_ratio), 'city'].values[0])
+cities.append(df.loc[df.voters_ratio == np.min(df.voters_ratio), 'city'].values[0])
+
+#########################
+index_cities = [list(df.city).index(i) for i in cities]
 checkbox_cities_labels = list(df.city.unique())
 city_selection = CheckboxGroup(labels=checkbox_cities_labels,
-                               active=[])
+                               active=index_cities)
 
 #########################
-columns_to_select = [c for c in df.columns] # if c.startswith('_')]
-# columns_to_select = ['city'] + columns_to_select
-# df = df.loc[:, columns_to_select]
+columns_to_select = ['voters_ratio', 'population']
 
-cols = list(df.columns)
-cols.remove('city')
-
-for c in cols:
+for c in columns_to_select:
     df[c] = pd.to_numeric(df[c], errors='coerce')
-
-df = df.fillna(value=-1.0)
 
 #########################
 df.set_index('city', inplace=True)
-
-#########################
-checkbox_determinants_labels = list(cols)
-determinants_selection = CheckboxGroup(labels=list(np.sort(checkbox_determinants_labels)),
-                                       active=[10, 11])
+df = df.loc[:, ['voters_ratio', 'population']]
 
 #########################
 x, counts = create_x_and_counts(df=df, cities=cities)
 
 source = ColumnDataSource(data=dict(x=x, counts=counts, colors=()))  # ,colors=(sum(zip(Spectral6, Spectral6), ())
 
-p = figure(x_range=FactorRange(*source.data['x']), plot_width=1400, plot_height=850, title="Determinants Comparison",
+p = figure(x_range=FactorRange(*source.data['x']), plot_width=400, plot_height=800, title="voters ratio comparison",
            toolbar_location=None, tools="")
 
+####################################
+palette = Spectral4 + Spectral6
+palette += palette
+clrs = []
+for i in range(len(cities)):
+    factor = 1
+    clrs.extend([palette[i]] * factor)
+
+source_new = ColumnDataSource(data=dict(x=x,
+                                        counts=counts,
+                                        colors=palette[0: len(cities)] * int(len(counts) / len(cities)),
+                                        cities=cities * int(len(counts) / len(cities))))
+source.data = source_new.data
+p.vbar(x=source.data['x'], top=source.data['counts'], width=0.9,
+       line_color="black",
+       fill_color=clrs)
+
+p.x_range.factors = source.data['x']
+p.xgrid.grid_line_color = None
+
+########################################
 p.xaxis.major_label_orientation = "vertical"
 
 city_selection.on_change('active', update_plot)
-determinants_selection.on_change('active', update_plot)
 
 checkbox_cities_column = column(city_selection)
-checkbox_determinants_column = column(determinants_selection)
 
 bokeh_doc = curdoc()
-bokeh_doc.add_root(row(checkbox_cities_column, p, checkbox_determinants_column, width=1500))
+bokeh_doc.add_root(row(checkbox_cities_column, p, width=1500))
 
-# bokeh serve --show plot_bar_chart_aggregated_community_data.py
+# bokeh serve --show Community/plot_bar_chart_aggregated_community_data.py
 # python -m notebook
