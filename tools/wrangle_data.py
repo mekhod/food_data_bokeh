@@ -56,3 +56,23 @@ def parse_community_data(work=None):
                                  'county_code': county_code}
 
     return dict_individual_community
+
+def parse_education_data(work=None):
+    ##
+    year_of_interview = work[17:21]
+    interview_type = work[56:58]  # 1 is interview and what we need here
+    state_code = work[92:94]
+    metropolitan_code = work[95:100]  # 00000 means it is not identified
+    county_code = work[100:103]  # 000 means it is not identified
+    education_type = work[136:138].strip()
+    age_range = work[160:162]  # anything other than 1, as 1 is child
+
+    dict_individual_education = {'interview_type': interview_type,
+                                 'education_type': education_type,
+                                 'age_range': age_range,
+                                 'year_of_interview': year_of_interview,
+                                 'state_code': state_code,
+                                 'metropolitan_code': metropolitan_code,
+                                 'county_code': county_code}
+
+    return dict_individual_education

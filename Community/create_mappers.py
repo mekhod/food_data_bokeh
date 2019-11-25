@@ -80,13 +80,31 @@ mapper_voting_type = {'1': 'yes', '2': 'no',
                       '-2': 'not_know', '-3': 'refused',
                       '-9': 'no_response'}
 
+mapper_education_type = {'31': 'LESS THAN 1ST GRADE',
+                         '32': '1ST, 2ND, 3RD OR 4TH GRADE',
+                         '33': '5TH OR 6TH GRADE',
+                         '34': '7TH OR 8TH GRADE',
+                         '35': '9TH GRADE',
+                         '36': '10TH GRADE',
+                         '37': '11TH GRADE',
+                         '38': '12TH GRADE NO DIPLOMA',
+                         '39': 'HIGH SCHOOL GRAD-DIPLOMA OR EQUIV (GED)',
+                         '40': 'SOME COLLEGE BUT NO DEGREE',
+                         '41': 'ASSOCIATE DEGREE-OCCUPATIONAL/VOCATIONAL',
+                         '42': 'ASSOCIATEDEGREE-ACADEMICPROGRAM',
+                         '43': "BACHELOR'S DEGREE (EX: BA, AB, BS)",
+                         "44": "MASTER'S DEGREE (EX:MA,MS,MEng,MEd, MSW)",
+                         "45": "PROFESSIONAL SCHOOL DEG (EX:MD, DDS, DVM)",
+                         "46": "DOCTORATE DEGREE (EX: PhD, EdD)"}
+
 ##############################
 mappers_all = {'mapper_metro': mapper_metro,
                'mapper_age_range': mapper_age_range,
                'mapper_interview_type': mapper_interview_type,
                'mapper_state_code': mapper_state_code,
                'mapper_registered_type': mapper_registered_type,
-               'mapper_voting_type': mapper_voting_type}
+               'mapper_voting_type': mapper_voting_type,
+               'mapper_education_type': mapper_education_type}
 
 ################################
 with open('data/Community_Context/mappers.pkl', 'wb') as f:

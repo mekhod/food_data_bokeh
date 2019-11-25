@@ -126,5 +126,5 @@ checkbox_cities_column = column(city_selection)
 bokeh_doc = curdoc()
 bokeh_doc.add_root(row(checkbox_cities_column, p, width=1500))
 
-# bokeh serve --show Community/plot_bar_chart_aggregated_community_data.py
+# bokeh serve --show Community/plot_bar_chart_aggregated_education_data.py
 # python -m notebook

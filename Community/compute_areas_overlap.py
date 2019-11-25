@@ -11,7 +11,7 @@ areas_voters = list(df_voters_ratio.metropolitan)
 
 areas_all = areas_food + areas_voters
 
-vect = TfidfVectorizer(stop_words=["city", "new", "county", "falls"], analyzer='word')
+vect = TfidfVectorizer(stop_words=["city", "new", "county", "falls", "st."], analyzer='word')
 
 tfidf = vect.fit_transform(areas_all)
 
@@ -26,18 +26,10 @@ for i, area_food in enumerate(areas_food):
     max_array_similarity_right_tail = np.max(array_similarity_right_tail)
 
     if max_array_similarity_right_tail != 0:
-        # array_argsort = np.flip(np.argsort(array_similarity_right_tail))
-        # for ind in array_argsort:
-        #     similarity = array_similarity_right_tail[ind]
-        #     count = 0
-        #     if similarity != 0:
+
         arg_max_array_similarity_right_tail = np.argmax(array_similarity_right_tail)
         area_voter = areas_voters[arg_max_array_similarity_right_tail]
-                # area_voter = areas_voters[ind]
         mapper_area[area_food] = area_voter
-                # count += 1
-            # else:
-            #     break
     else:
         mapper_area[area_food] = None
 
