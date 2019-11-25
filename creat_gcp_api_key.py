@@ -1,6 +1,6 @@
 import pickle
 
-dict_api_key = {'gcp_api_key': 'AIzaSyCALNrMHjCXqOfOITmuOt0rcvCHxGnsdvw'}
+dict_api_key = {'gcp_api_key': 'sth'}
 
 
 with open('gcp_api_key.pkl', 'wb') as handle:
