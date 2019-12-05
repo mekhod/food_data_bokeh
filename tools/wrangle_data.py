@@ -57,6 +57,7 @@ def parse_community_data(work=None):
 
     return dict_individual_community
 
+
 def parse_education_data(work=None):
     ##
     year_of_interview = work[17:21]
@@ -76,3 +77,24 @@ def parse_education_data(work=None):
                                  'county_code': county_code}
 
     return dict_individual_education
+
+
+def parse_want_job_data(work=None):
+    ##
+    year_of_interview = work[17:21]
+    state_code = work[92:94]
+    metropolitan_code = work[95:100]  # 00000 means it is not identified
+    county_code = work[100:103]  # 000 means it is not identified
+    age_range = work[160:162]  # anything other than 1, as 1 is child
+    want_job = work[199: 201].strip()
+    voting_type = work[1000:1002].strip()  # voter type cannot be -1 because it means the person is not in
+
+    dict_job_status = {'want_job': want_job,
+                       'voting_type': voting_type,
+                       'age_range': age_range,
+                       'year_of_interview': year_of_interview,
+                       'state_code': state_code,
+                       'metropolitan_code': metropolitan_code,
+                       'county_code': county_code}
+
+    return dict_job_status
