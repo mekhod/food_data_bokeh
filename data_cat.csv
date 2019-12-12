@@ -1,0 +1,6 @@
+﻿detrminant,data,path,length
+Community,data_voters_ratio,data/Community_Context/data_voters_ratio.csv,261
+Education,education_weight,data/Education/data_education_weight.csv,261
+Food,pca_food_data,data/Food/pca_food_data.csv,135
+Job_Security,uninsured_percent,data/Job_Security/uninsured_percent.csv,382
+Parks,data_park_access_ratio,data/Parks/data_park_access_ratio.csv,938
