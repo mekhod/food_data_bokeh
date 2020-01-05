@@ -1,11 +1,17 @@
 import pandas as pd
 import math
 import numpy as np
+import pickle
 
 
-df = pd.read_csv('data/data_all_determinants_with_normed_metro.csv')
-df.sort_values('metro_normed', inplace=True)
+# df = pd.read_csv('data/data_all_determinants_with_normed_metro.csv')
+# df.sort_values('metro_normed', inplace=True)
 
+with open('back_end_dev/dict_data_scaler.pkl', 'rb') as handle:
+    dict_data_scaler = pickle.load(handle)
+
+df = dict_data_scaler['df_standardized'].copy()
+scaler = dict_data_scaler['scaler']
 
 def calc_dist(metro_df=None,
               metro_area=None,
@@ -13,16 +19,23 @@ def calc_dist(metro_df=None,
               voting_likelihood=None,
               education=None,
               insured=None,
-              park_access=None
+              park_access=None,
+              scaler=None
               ):
-    metro_data = metro_df.loc[metro_df.metro_normed == metro_area, :]
+    dict_individual_data = {}
+    dict_individual_data['metro_normed'] = metro_area
+
     ## fruit
     # fruit_n_per_day varies between 0.5 and 2
     assert (fruit_per_day >= 0.5) and (fruit_per_day <= 2)
     food_first_pc_new = (11 / 1.5) * (fruit_per_day - 0.5) - 5
 
+    dict_individual_data['food_first_pc'] = food_first_pc_new
+
     ## voting liklihood
     assert (voting_likelihood >= 0) and (voting_likelihood <= 1)
+
+    dict_individual_data['voters_ratio'] = voting_likelihood
 
     ## education weight
     mapper_education = {'LESS THAN 1ST GRADE': 0,
@@ -46,18 +59,53 @@ def calc_dist(metro_df=None,
 
     education_rank = mapper_education[education]
 
+    dict_individual_data['education_weight'] = education_rank
+
     ## insured
     assert (insured == 1) or (insured == 0)
     uninsured = 1 - insured
 
+    dict_individual_data['uninsured_ratio'] = uninsured
+
     ## park_access
     assert (park_access == 1) or (park_access == 0)
 
-    dist = math.sqrt((food_first_pc_new - metro_data['food_first_pc'])**2 +
-                     (voting_likelihood - metro_data['voters_ratio'])**2 +
-                     (education_rank - metro_data['education_weight'])**2 +
-                     (uninsured - metro_data['uninsured_ratio'])**2 +
-                     (park_access - metro_data['park_access_ratio'])**2)
+    dict_individual_data['park_access_ratio'] = park_access
+
+    # print(dict_individual_data)
+
+    ## df
+    df_individual_data = pd.DataFrame(dict_individual_data, index=[0])
+    df_individual_data = df_individual_data.loc[:,
+                         ['voters_ratio',
+                          'education_weight',
+                          'food_first_pc',
+                          'uninsured_ratio',
+                          'park_access_ratio']]
+
+    ## standardize individual data
+    individual_data_standardized = scaler.transform(df_individual_data)
+    individual_data_standardized = pd.DataFrame(individual_data_standardized)
+    mapper_col = {i: j for i, j in enumerate(df_individual_data.columns)}
+    individual_data_standardized = individual_data_standardized.rename(mapper_col, axis=1)
+
+    food_first_pc_new = individual_data_standardized['food_first_pc']
+    voting_likelihood = individual_data_standardized['voters_ratio']
+    education_rank = individual_data_standardized['education_weight']
+    uninsured = individual_data_standardized['uninsured_ratio']
+    park_access = individual_data_standardized['park_access_ratio']
+
+    # print(metro_area)
+
+    ##
+    metro_data = metro_df.loc[metro_df.metro_normed == metro_area, :]
+    # print(metro_data['park_access_ratio'].values.squeeze())
+    dist = math.sqrt((food_first_pc_new - metro_data['food_first_pc'].values.squeeze())**2 +
+                     (voting_likelihood - metro_data['voters_ratio'].values.squeeze())**2 +
+                     (education_rank - metro_data['education_weight'].values.squeeze())**2 +
+                     (uninsured - metro_data['uninsured_ratio'].values.squeeze())**2 +
+                     (park_access - metro_data['park_access_ratio'].values.squeeze())**2)
+
     return dist
 
 
@@ -91,9 +139,12 @@ for m in list(df.metro_normed):
                                                         voting_likelihood=voting_likelihood,
                                                         education=education,
                                                         insured=insured,
-                                                        park_access=park_access
+                                                        park_access=park_access,
+                                                        scaler=scaler
                                                         ))
+    # print(list_distances)
     dict_dist_metro[m] = list_distances
+    # print(dict_dist_metro)
 
 
 list_min_max = []
