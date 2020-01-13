@@ -158,4 +158,9 @@ for m in list(dict_dist_metro.keys()):
 
 
 df_dist_min_max = pd.DataFrame(list_min_max)
-df_dist_min_max.to_csv('back_end_dev/df_dist_min_max.csv')
+# df_dist_min_max.to_csv('back_end_dev/df_dist_min_max.csv')
+
+dict_data_scaler['df_dist_min_max'] = df_dist_min_max
+
+with open('back_end_dev/dict_data_scaler.pkl', 'wb') as handle:
+    pickle.dump(dict_data_scaler, handle, protocol=pickle.HIGHEST_PROTOCOL)
