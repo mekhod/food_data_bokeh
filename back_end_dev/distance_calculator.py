@@ -11,6 +11,8 @@ with open('back_end_dev/dict_data_scaler.pkl', 'rb') as handle:
     dict_data_scaler = pickle.load(handle)
 
 df = dict_data_scaler['df_standardized'].copy()
+df['state_code'] = df.metro_normed.apply(lambda x: x.split(',')[1].strip().split(' ')[0])
+df['metro_name'] = df.metro_normed.apply(lambda x: x.split(',')[0].strip())
 scaler = dict_data_scaler['scaler']
 
 def calc_dist(metro_df=None,
@@ -164,3 +166,10 @@ dict_data_scaler['df_dist_min_max'] = df_dist_min_max
 
 with open('back_end_dev/dict_data_scaler.pkl', 'wb') as handle:
     pickle.dump(dict_data_scaler, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
+
+
+
+

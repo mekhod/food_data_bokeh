@@ -121,6 +121,7 @@ df['metro_name'] = df.metro_normed.apply(lambda x: x.split(',')[0].strip())
 scaler = dict_data_scaler['scaler']
 df_dist_min_max = dict_data_scaler['df_dist_min_max']
 
+
 ##
 # list_similarity = []
 dict_all_metro_sim = {}
