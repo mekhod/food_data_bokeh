@@ -151,31 +151,45 @@ for state_code in list(df_states_divided['state_code'].unique()):
 
     ##
     dict_final_all_state[state_code] = dict_temp_all_metros_in_one_state
+#####################################################################
 
-json_all_metro_similarity = json.dumps(dict_final_all_state)
+list_all_states = []
+for s in list(dict_final_all_state.keys()):
+    dict_one_state = {}
+    dict_one_state["Code"] = s
+    # print(dict_final_all_state[s])
+    list_all_cities_in_one_state = []
+    for c in list(dict_final_all_state[s].keys()):
+        dict_one_city = {}
+        print(c)
+        print(dict_final_all_state[s][c])
+        Name = c
+        Scores = dict_final_all_state[s][c]['Scores']
+        Responses = dict_final_all_state[s][c]['Responses']
+        Min_Max = dict_final_all_state[s][c]['Min_Max']
+        dict_one_city["Name"] = Name.split("-")[0].strip()
+        dict_one_city["Scores"] = Scores
+        dict_one_city["Responses"] = Responses
+        dict_one_city["min_max"] = Min_Max
+        list_all_cities_in_one_state.append(dict_one_city)
+    dict_one_state["Cities"] = list_all_cities_in_one_state
+    list_all_states.append(dict_one_state)
 
-with open('back_end_dev/json_3.json', 'w', encoding='utf-8') as f:
-    json.dump(json_all_metro_similarity, f, ensure_ascii=False)
+dict_final = {}
+dict_final["States"] = list_all_states
+list_final = [dict_final]
 
-## the structure
 
-{"DC":
-     {"Philadelphia-Camden-Wilmington":
-          {"min_max": [0.1, 0.9],
-           "Responses":
-               {"Vote":
-                    {"No": 0.6,
-                     "Yes": 0.4},
-                "Others":
-                    {"...": "..."}
-                },
-           "Scores": {"HealthcareCoverage": 0.86,
-                      "ParkAccessibility": 0.37,
-                      "AccessToHealthyFood": 0.48,
-                      "EducationLevel": 0.69,
-                      "CivicEngagement": 0.6}
-           },
-      "metro2 (next metro area in DC)": "..."
-      },
- "WA": "..."
- }
+
+
+
+
+
+
+
+
+######################################################################
+json_all_metro_similarity_4 = json.dumps(list_final)
+
+with open('back_end_dev/json_4.json', 'w', encoding='utf-8') as f:
+    json.dump(json_all_metro_similarity_4, f, ensure_ascii=False)
