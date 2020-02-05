@@ -3,25 +3,155 @@ import numpy as np
 import pickle
 import json
 
+##################################################
+df_corrected_cities_states = pd.read_csv('data/corrected_cities_states_Kelsey.csv')
+
+us_state_abbrev = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'District of Columbia': 'DC',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Northern Mariana Islands':'MP',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Palau': 'PW',
+    'Pennsylvania': 'PA',
+    'Puerto Rico': 'PR',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virgin Islands': 'VI',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY',
+}
+
+df_corrected_cities_states = df_corrected_cities_states.rename(columns={'State': 'state',
+                                                                        'City': 'metro_name'})
+df_corrected_cities_states['state_code'] = df_corrected_cities_states.state.map(us_state_abbrev)
+
+mapper_metro_to_metro_name = dict(zip(df_corrected_cities_states.metro_normed,
+                                      df_corrected_cities_states.metro_name))
+
+mapper_metro_to_state = dict(zip(df_corrected_cities_states.metro_normed,
+                                 df_corrected_cities_states.state))
+
+us_state_abbrev = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'District of Columbia': 'DC',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Northern Mariana Islands':'MP',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Palau': 'PW',
+    'Pennsylvania': 'PA',
+    'Puerto Rico': 'PR',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virgin Islands': 'VI',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY',
+}
+
+##
 with open('back_end_dev/dict_data_scaler.pkl', 'rb') as handle:
     dict_data_scaler = pickle.load(handle)
 
+##
+df = df_corrected_cities_states.copy()
 df = dict_data_scaler['df_standardized'].copy()
-df['state_code'] = df.metro_normed.apply(lambda x: x.split(',')[1].strip().split(' ')[0])
-df['metro_name'] = df.metro_normed.apply(lambda x: x.split(',')[0].strip())
+
+df['metro_name'] = df.metro_normed.map(mapper_metro_to_metro_name)
+df['state'] = df.metro_normed.map(mapper_metro_to_state)
+df['state_code'] = df.state.map(us_state_abbrev)
+
+
+##
 scaler = dict_data_scaler['scaler']
 df_dist_min_max = dict_data_scaler['df_dist_min_max']
 
-## new structure of json file
-# replicate information for the shared metro areas
-list_states_divided = []
-for _, row in df.iterrows():
-    for state in row['state_code'].split('-'):
-        dict_current_state = dict(row)
-        dict_current_state['state_code'] = state
-        list_states_divided.append(dict_current_state)
 
-df_states_divided = pd.DataFrame(list_states_divided)
+## new structure of json file
+df_states_divided = df.copy()
 
 # to create nested dictionary
 dict_final_all_state = {}
@@ -156,6 +286,7 @@ for state_code in list(df_states_divided['state_code'].unique()):
 list_all_states = []
 for s in list(dict_final_all_state.keys()):
     dict_one_state = {}
+    dict_one_state["Name"] = dict_state_code_mapper[s]
     dict_one_state["Code"] = s
     list_all_cities_in_one_state = []
     for c in list(dict_final_all_state[s].keys()):
@@ -164,7 +295,9 @@ for s in list(dict_final_all_state.keys()):
         Scores = dict_final_all_state[s][c]['Scores']
         Responses = dict_final_all_state[s][c]['Responses']
         Min_Max = dict_final_all_state[s][c]['Min_Max']
-        dict_one_city["Name"] = Name.split("-")[0].strip()
+        dict_one_city["Name"] = Name.split("-")[0].strip().split("/")[-1].strip()
+        print(dict_one_city["Name"])
+        dict_one_city["Code"] = str.lower(s.strip() + dict_one_city["Name"].replace(" ", ""))
         dict_one_city["Scores"] = Scores
         dict_one_city["Responses"] = Responses
         dict_one_city["min_max"] = Min_Max
@@ -177,5 +310,5 @@ dict_final["States"] = list_all_states
 list_final = [dict_final]
 
 ######################################################################
-with open('back_end_dev/json_4.json', 'w', encoding='utf-8') as f:
+with open('back_end_dev/json_6.json', 'w', encoding='utf-8') as f:
     json.dump(list_final, f, ensure_ascii=False)
