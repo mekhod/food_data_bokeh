@@ -91,4 +91,4 @@ df_all_similarities = pd.DataFrame(list_all_cases)
 df_tests = df_all_similarities.sample(n=100, random_state=198)
 
 df_all_similarities.to_csv('back_end_dev/similarities_all_combinations_2.csv', index=False)
-df_tests.to_csv('back_end_dev/similarities_100_combinations_2.csv', index=False)
+df_tests.to_csv('back_end_dev/similarities_100_combinations_2_1.csv', index=False)

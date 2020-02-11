@@ -3,16 +3,9 @@ import numpy as np
 import pickle
 import json
 
-with open('back_end_dev/dict_data_scaler.pkl', 'rb') as handle:
-    dict_data_scaler = pickle.load(handle)
+##################################################
+df_corrected_cities_states = pd.read_csv('data/corrected_cities_states_Kelsey.csv')
 
-df = dict_data_scaler['df_standardized'].copy()
-df['state_code'] = df.metro_normed.apply(lambda x: x.split(',')[1].strip().split(' ')[0])
-df['metro_name'] = df.metro_normed.apply(lambda x: x.split(',')[0].strip())
-scaler = dict_data_scaler['scaler']
-df_dist_min_max = dict_data_scaler['df_dist_min_max']
-
-#########################
 us_state_abbrev = {
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -49,7 +42,7 @@ us_state_abbrev = {
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Northern Mariana Islands':'MP',
+    'Northern Mariana Islands': 'MP',
     'Ohio': 'OH',
     'Oklahoma': 'OK',
     'Oregon': 'OR',
@@ -71,30 +64,110 @@ us_state_abbrev = {
     'Wyoming': 'WY',
 }
 
-# dict_state_code_mapper = dict(zip(us_state_abbrev.values(), us_state_abbrev.keys()))
+df_corrected_cities_states = df_corrected_cities_states.rename(columns={'State': 'state',
+                                                                        'City': 'metro_name'})
+df_corrected_cities_states['state_code'] = df_corrected_cities_states.state.map(us_state_abbrev)
+
+mapper_metro_to_metro_name = dict(zip(df_corrected_cities_states.metro_normed,
+                                      df_corrected_cities_states.metro_name))
+
+mapper_metro_to_state = dict(zip(df_corrected_cities_states.metro_normed,
+                                 df_corrected_cities_states.state))
+
+us_state_abbrev = {
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'District of Columbia': 'DC',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Northern Mariana Islands': 'MP',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Palau': 'PW',
+    'Pennsylvania': 'PA',
+    'Puerto Rico': 'PR',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virgin Islands': 'VI',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY',
+}
 
 dict_state_code_mapper = dict(zip(us_state_abbrev.values(), us_state_abbrev.keys()))
 
-##########################
+##
+with open('back_end_dev/dict_data_scaler.pkl', 'rb') as handle:
+    dict_data_scaler = pickle.load(handle)
+
+##
+df = df_corrected_cities_states.copy()
+df = dict_data_scaler['df_standardized'].copy()
+
+df['metro_name'] = df.metro_normed.map(mapper_metro_to_metro_name)
+df['state'] = df.metro_normed.map(mapper_metro_to_state)
+df['state_code'] = df.state.map(us_state_abbrev)
+
+##
+scaler = dict_data_scaler['scaler']
+df_dist_min_max = dict_data_scaler['df_dist_min_max']
 
 ## new structure of json file
-# replicate information for the shared metro areas
-list_states_divided = []
-for _, row in df.iterrows():
-    for state in row['state_code'].split('-'):
-        dict_current_state = dict(row)
-        dict_current_state['state_code'] = state
-        list_states_divided.append(dict_current_state)
+df_states_divided = df.copy()
 
-df_states_divided = pd.DataFrame(list_states_divided)
+df_states_divided.sort_values(by=['state', 'metro_name'], inplace=True)
 
-df_states_divided.sort_values(by=['state_code', 'metro_name'], inplace=True)
+df_states_divided.loc[:, ['state', 'metro_name']]
+
+##
+
 
 # to create nested dictionary
 dict_final_all_state = {}
 for state_code in list(df_states_divided['state_code'].unique()):
+    df_temp_one_state_code = None
     df_temp_one_state_code = \
         df_states_divided[df_states_divided['state_code'] == state_code].copy()
+
+    df_temp_one_state_code.sort_values(by=['state', 'metro_name'], inplace=True)
 
     ##
     dict_temp_all_metros_in_one_state = {}
@@ -211,7 +284,8 @@ for state_code in list(df_states_divided['state_code'].unique()):
         dict_temp_metro['Min_Max'] = str([min_distance, max_distance])
         dict_temp_metro['Responses'] = dict_temp_responses
         dict_temp_metro['Scores'] = dict_metro_scores
-
+        dict_temp_metro['AVG_Scores'] = round(np.mean(list(dict_metro_scores.values())), 3)
+        print(dict_temp_metro['AVG_Scores'])
 
         ##
         dict_temp_all_metros_in_one_state[row['metro_name']] = dict_temp_metro
@@ -232,12 +306,14 @@ for s in list(dict_final_all_state.keys()):
         Scores = dict_final_all_state[s][c]['Scores']
         Responses = dict_final_all_state[s][c]['Responses']
         Min_Max = dict_final_all_state[s][c]['Min_Max']
+        AVG_Score = dict_final_all_state[s][c]['AVG_Scores']
         dict_one_city["Name"] = Name.split("-")[0].strip().split("/")[-1].strip()
         print(dict_one_city["Name"])
         dict_one_city["Code"] = str.lower(s.strip() + dict_one_city["Name"].replace(" ", ""))
         dict_one_city["Scores"] = Scores
         dict_one_city["Responses"] = Responses
         dict_one_city["min_max"] = Min_Max
+        dict_one_city["AVG_Score"] = AVG_Score
         list_all_cities_in_one_state.append(dict_one_city)
     dict_one_state["Cities"] = list_all_cities_in_one_state
     list_all_states.append(dict_one_state)
@@ -247,5 +323,5 @@ dict_final["States"] = list_all_states
 list_final = [dict_final]
 
 ######################################################################
-with open('back_end_dev/json_5.json', 'w', encoding='utf-8') as f:
+with open('back_end_dev/json_6_with_avg_score.json', 'w', encoding='utf-8') as f:
     json.dump(list_final, f, ensure_ascii=False)

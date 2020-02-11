@@ -42,7 +42,7 @@ us_state_abbrev = {
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Northern Mariana Islands':'MP',
+    'Northern Mariana Islands': 'MP',
     'Ohio': 'OH',
     'Oklahoma': 'OK',
     'Oregon': 'OR',
@@ -110,7 +110,7 @@ us_state_abbrev = {
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Northern Mariana Islands':'MP',
+    'Northern Mariana Islands': 'MP',
     'Ohio': 'OH',
     'Oklahoma': 'OK',
     'Oregon': 'OR',
@@ -144,20 +144,28 @@ df['metro_name'] = df.metro_normed.map(mapper_metro_to_metro_name)
 df['state'] = df.metro_normed.map(mapper_metro_to_state)
 df['state_code'] = df.state.map(us_state_abbrev)
 
-
 ##
 scaler = dict_data_scaler['scaler']
 df_dist_min_max = dict_data_scaler['df_dist_min_max']
 
-
 ## new structure of json file
 df_states_divided = df.copy()
+
+df_states_divided.sort_values(by=['state', 'metro_name'], inplace=True)
+
+df_states_divided.loc[:, ['state', 'metro_name']]
+
+##
+
 
 # to create nested dictionary
 dict_final_all_state = {}
 for state_code in list(df_states_divided['state_code'].unique()):
+    df_temp_one_state_code = None
     df_temp_one_state_code = \
         df_states_divided[df_states_divided['state_code'] == state_code].copy()
+
+    df_temp_one_state_code.sort_values(by=['state', 'metro_name'], inplace=True)
 
     ##
     dict_temp_all_metros_in_one_state = {}
@@ -274,7 +282,6 @@ for state_code in list(df_states_divided['state_code'].unique()):
         dict_temp_metro['Min_Max'] = str([min_distance, max_distance])
         dict_temp_metro['Responses'] = dict_temp_responses
         dict_temp_metro['Scores'] = dict_metro_scores
-
 
         ##
         dict_temp_all_metros_in_one_state[row['metro_name']] = dict_temp_metro
